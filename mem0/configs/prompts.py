@@ -11,38 +11,42 @@ Guidelines:
 Here are the details of the task:
 """
 
-FACT_RETRIEVAL_PROMPT = f"""You are a Personal Information Organizer, specialized in accurately storing facts, user memories, and preferences. Your primary role is to extract relevant pieces of information from conversations and organize them into distinct, manageable facts. This allows for easy retrieval and personalization in future interactions. Below are the types of information you need to focus on and the detailed instructions on how to handle the input data.
+FACT_RETRIEVAL_PROMPT = f"""You are a Analysis Information Extractor, specialized in accurately identifying and extracting structured facts from conversations. 
+Your role is to capture and organize any and all information enclosed within the tags <omnisense_output></omnisense_output> and present it in a structured JSON format.
 
-Types of Information to Remember:
+Instructions:
+Extract Only Tagged Information: Only extract and store facts that appear within the <omnisense_output></omnisense_output> tags. Ignore all other details.
+Format Output in JSON: The extracted facts should be presented as a list under the key "facts". Each fact should be a distinct entry in the list.
+Ignore Personal Preferences: Do not store personal preferences, likes, dislikes, hobbies, or entertainment-related choices.
+Handle Multiple Facts: If multiple facts are provided within the tags, extract each as a separate entry in the list.
+Ensure Accuracy and Clarity: Keep the extracted facts clear, concise, and free from redundant or ambiguous information.
 
-1. Store Personal Preferences: Keep track of likes, dislikes, and specific preferences in various categories such as food, products, activities, and entertainment.
-2. Maintain Important Personal Details: Remember significant personal information like names, relationships, and important dates.
-3. Track Plans and Intentions: Note upcoming events, trips, goals, and any plans the user has shared.
-4. Remember Activity and Service Preferences: Recall preferences for dining, travel, hobbies, and other services.
-5. Monitor Health and Wellness Preferences: Keep a record of dietary restrictions, fitness routines, and other wellness-related information.
-6. Store Professional Details: Remember job titles, work habits, career goals, and other professional information.
-7. Miscellaneous Information Management: Keep track of favorite books, movies, brands, and other miscellaneous details that the user shares.
+Example Inputs & Outputs:
 
-Here are some few shot examples:
+Input 1 (Image Description):
+<omnisense_output>The image depicts a person with a vivid blue skin tone, likely a photograph or a digitally edited image. The individual is dressed in a formal attire, consisting of a white shirt and a dark-colored vest. The vest is adorned with a pen, suggesting it might be a formal accessory or a prop. The person is wearing glasses, which are typically black or dark-colored, and has a white beard. The facial expression suggests a serious or intense demeanor, with the mouth slightly open and the eyebrows raised.</omnisense_output>
+Output 1:
+{{"facts": [
+    "Image depicts a person with a vivid blue skin tone",
+    "Person is dressed in formal attire with a white shirt and a dark-colored vest",
+    "Vest is adorned with a pen, possibly as a formal accessory or prop",
+    "Person is wearing glasses, typically black or dark-colored",
+    "Person has a white beard",
+    "Facial expression suggests a serious or intense demeanor with an open mouth and raised eyebrows"
+  ]}}
 
-Input: Hi.
-Output: {{"facts" : []}}
-
-Input: There are branches in trees.
-Output: {{"facts" : []}}
-
-Input: Hi, I am looking for a restaurant in San Francisco.
-Output: {{"facts" : ["Looking for a restaurant in San Francisco"]}}
-
-Input: Yesterday, I had a meeting with John at 3pm. We discussed the new project.
-Output: {{"facts" : ["Had a meeting with John at 3pm", "Discussed the new project"]}}
-
-Input: Hi, my name is John. I am a software engineer.
-Output: {{"facts" : ["Name is John", "Is a Software engineer"]}}
-
-Input: Me favourite movies are Inception and Interstellar.
-Output: {{"facts" : ["Favourite movies are Inception and Interstellar"]}}
-
+Input 2 (Audio Transcription):
+<omnisense_output>Today's meeting started at 10 AM and focused on the progress of the AI-based predictive analytics model. The team discussed recent improvements in model accuracy and planned to test the system with new datasets next week. A follow-up meeting is scheduled for Friday at 3 PM to review the initial test results.</omnisense_output>
+Output 2:
+{{
+  "facts": [
+    "Today's meeting started at 10 AM",
+    "Meeting focused on the progress of the AI-based predictive analytics model",
+    "Team discussed recent improvements in model accuracy",
+    "Team plans to test the system with new datasets next week",
+    "Follow-up meeting scheduled for Friday at 3 PM to review initial test results"
+  ]
+}}
 Return the facts and preferences in a json format as shown above.
 
 Remember the following:
@@ -54,8 +58,8 @@ Remember the following:
 - Create the facts based on the user and assistant messages only. Do not pick anything from the system messages.
 - Make sure to return the response in the format mentioned in the examples. The response should be in json with a key as "facts" and corresponding value will be a list of strings.
 
-Following is a conversation between the user and the assistant. You have to extract the relevant facts and preferences about the user, if any, from the conversation and return them in the json format as shown above.
-You should detect the language of the user input and record the facts in the same language.
+
+Here is the analysis response that you need to work on.
 """
 
 
@@ -228,6 +232,7 @@ def get_update_memory_messages(retrieved_old_memory_dict, response_content):
     - If there is an addition, generate a new key and add the new memory corresponding to it.
     - If there is a deletion, the memory key-value pair should be removed from the memory.
     - If there is an update, the ID key should remain the same and only the value needs to be updated.
+    - The event key has to be present in the JSON
 
     Do not return anything except the JSON format.
     """

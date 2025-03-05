@@ -2,6 +2,7 @@ import concurrent
 import hashlib
 import json
 import logging
+from pprint import pprint
 import uuid
 import warnings
 from datetime import datetime
@@ -160,7 +161,6 @@ class Memory(MemoryBase):
             ],
             response_format={"type": "json_object"},
         )
-
         try:
             response = remove_code_blocks(response)
             new_retrieved_facts = json.loads(response)["facts"]
@@ -186,11 +186,18 @@ class Memory(MemoryBase):
         retrieved_old_memory = list(unique_data.values())
         logging.info(f"Total existing memories: {len(retrieved_old_memory)}")
 
+        print(f"Total existing memories: {len(retrieved_old_memory)}")
+
         # mapping UUIDs with integers for handling UUID hallucinations
         temp_uuid_mapping = {}
         for idx, item in enumerate(retrieved_old_memory):
             temp_uuid_mapping[str(idx)] = item["id"]
             retrieved_old_memory[idx]["id"] = str(idx)
+
+        print("----------------------------------------------------------\n\n\n\n")
+        print("new_retrieved_facts")
+        pprint(new_retrieved_facts)
+        print()
 
         function_calling_prompt = get_update_memory_messages(retrieved_old_memory, new_retrieved_facts)
 
@@ -198,6 +205,11 @@ class Memory(MemoryBase):
             messages=[{"role": "user", "content": function_calling_prompt}],
             response_format={"type": "json_object"},
         )
+
+        print("----------------------------------------------------------\n\n\n\n")
+        print("new_memories_with_actions")
+        pprint(new_memories_with_actions)
+        print()
 
         new_memories_with_actions = remove_code_blocks(new_memories_with_actions)
         new_memories_with_actions = json.loads(new_memories_with_actions)
